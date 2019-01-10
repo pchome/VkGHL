@@ -1,0 +1,5 @@
+.vscode
+compile_flags.txt
+
+layer_factory.cpp
+layer_factory.h
