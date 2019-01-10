@@ -12,55 +12,60 @@ class VkGHL : public layer_factory {
   using Clock     = std::chrono::steady_clock;
   using TimeDiff  = std::chrono::nanoseconds;
   using TimePoint = typename Clock::time_point;
-  public:
-    VkGHL()
-    : targetFrameTime(getFrameTime())
-    , vSync(getVSync())
-    , mipLODBias(getLodBias())
-    , AF(getAF())
-    , retroFilter(getRetro())
-    , frameOverhead(0)
-    , frameStart(Clock::now())
-    , frameEnd(Clock::now()) {
-      isDisabled = ! testSettings();
-      if (isDisabled)
-        std::fprintf(stderr, "VkGHL: disabled\n");
-    }
 
-    VkResult PreCallQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *pPresentInfo);
-    VkResult PostCallQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *pPresentInfo);
-    VkResult PreCallCreateSwapchainKHR(VkDevice device,  const VkSwapchainCreateInfoKHR *pCreateInfo, const VkAllocationCallbacks *pAllocator, VkSwapchainKHR *pSwapchain);
-    VkResult PreCallCreateSampler(VkDevice device, const VkSamplerCreateInfo* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkSampler* pSampler);
+ public:
+  VkGHL()
+      : targetFrameTime(getFrameTime()),
+        vSync(getVSync()),
+        mipLODBias(getLodBias()),
+        AF(getAF()),
+        retroFilter(getRetro()),
+        frameOverhead(0),
+        frameStart(Clock::now()),
+        frameEnd(Clock::now()) {
+    isDisabled = !testSettings();
+    if (isDisabled)
+      std::fprintf(stderr, "VkGHL: disabled\n");
+  }
 
-  private:
-    TimeDiff getFrameTime();
-    VkPresentModeKHR getVSync();
-    float getLodBias();
-    float getAF();
-    bool  getRetro();
+  VkResult PreCallQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *pPresentInfo);
+  VkResult PostCallQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *pPresentInfo);
+  VkResult PreCallCreateSwapchainKHR(VkDevice device, const VkSwapchainCreateInfoKHR *pCreateInfo, const VkAllocationCallbacks *pAllocator,
+                                     VkSwapchainKHR *pSwapchain);
+  VkResult PreCallCreateSampler(VkDevice device, const VkSamplerCreateInfo *pCreateInfo, const VkAllocationCallbacks *pAllocator,
+                                VkSampler *pSampler);
 
-    inline void limiter();
-    const bool  testSettings();
+ private:
+  VkPresentModeKHR getVSync();
 
-    inline bool isValidFPS();
-    inline bool isValidVSync();
-    inline bool isValidBias();
-    inline bool isValidAF();
-    inline bool isValidRetro();
+  TimeDiff getFrameTime();
+  float    getLodBias();
+  float    getAF();
+  bool     getRetro();
 
-    VkPresentModeKHR vSync;
-    float mipLODBias;
-    float AF;
-    bool  retroFilter;
+  inline void limiter();
+  const bool  testSettings();
 
-    const TimeDiff targetFrameTime;
-    TimeDiff  frameOverhead;
-    TimePoint frameStart;
-    TimePoint frameEnd;
+  inline bool isValidFPS();
+  inline bool isValidVSync();
+  inline bool isValidBias();
+  inline bool isValidAF();
+  inline bool isValidRetro();
 
-    bool isDisabled;
-  };
+  VkPresentModeKHR vSync;
 
+  const TimeDiff targetFrameTime;
+
+  float mipLODBias;
+  float AF;
+  bool  retroFilter;
+
+  TimeDiff  frameOverhead;
+  TimePoint frameStart;
+  TimePoint frameEnd;
+
+  bool isDisabled;
+};
 
 VkResult VkGHL::PreCallQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *pPresentInfo) {
   if (isDisabled)
@@ -77,29 +82,31 @@ VkResult VkGHL::PostCallQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *p
   return VK_SUCCESS;
 }
 
-VkResult VkGHL::PreCallCreateSwapchainKHR(VkDevice device,  const VkSwapchainCreateInfoKHR *pCreateInfo, const VkAllocationCallbacks *pAllocator, VkSwapchainKHR *pSwapchain) {
+VkResult VkGHL::PreCallCreateSwapchainKHR(VkDevice device, const VkSwapchainCreateInfoKHR *pCreateInfo, const VkAllocationCallbacks *pAllocator,
+                                          VkSwapchainKHR *pSwapchain) {
   if (isDisabled)
     return VK_SUCCESS;
   if (isValidVSync())
-    const_cast<VkPresentModeKHR&>(pCreateInfo->presentMode) = vSync;
+    const_cast<VkPresentModeKHR &>(pCreateInfo->presentMode) = vSync;
   return VK_SUCCESS;
 }
 
-VkResult VkGHL::PreCallCreateSampler(VkDevice device, const VkSamplerCreateInfo* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkSampler* pSampler) {
+VkResult VkGHL::PreCallCreateSampler(VkDevice device, const VkSamplerCreateInfo *pCreateInfo, const VkAllocationCallbacks *pAllocator,
+                                     VkSampler *pSampler) {
   if (isDisabled)
     return VK_SUCCESS;
 
   if (isValidBias())
-    const_cast<float&>(pCreateInfo->mipLodBias) = mipLODBias;
+    const_cast<float &>(pCreateInfo->mipLodBias) = mipLODBias;
 
   if (isValidAF()) {
-    const_cast<VkBool32&>(pCreateInfo->anisotropyEnable) = 1;
-    const_cast<float&>(pCreateInfo->maxAnisotropy) = AF;
+    const_cast<VkBool32 &>(pCreateInfo->anisotropyEnable) = 1;
+    const_cast<float &>(pCreateInfo->maxAnisotropy)       = AF;
   }
   if (isValidRetro()) {
-    const_cast<VkFilter&>(pCreateInfo->magFilter) = VkFilter::VK_FILTER_NEAREST;
-    const_cast<VkFilter&>(pCreateInfo->minFilter) = VkFilter::VK_FILTER_NEAREST;
-    const_cast<VkSamplerMipmapMode&>(pCreateInfo->mipmapMode) = VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST;
+    const_cast<VkFilter &>(pCreateInfo->magFilter)             = VkFilter::VK_FILTER_NEAREST;
+    const_cast<VkFilter &>(pCreateInfo->minFilter)             = VkFilter::VK_FILTER_NEAREST;
+    const_cast<VkSamplerMipmapMode &>(pCreateInfo->mipmapMode) = VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST;
   }
   return VK_SUCCESS;
 }
@@ -166,18 +173,14 @@ inline void VkGHL::limiter() {
   }
 }
 
-inline bool VkGHL::isValidFPS()   { return targetFrameTime > TimeDiff(0); }
-inline bool VkGHL::isValidVSync() { return vSync >= VkPresentModeKHR::VK_PRESENT_MODE_IMMEDIATE_KHR && vSync <= VkPresentModeKHR::VK_PRESENT_MODE_FIFO_KHR; }
-inline bool VkGHL::isValidBias()  { return mipLODBias >= -16.0f && mipLODBias <= 15.99f; }
-inline bool VkGHL::isValidAF()    { return AF >= 1 && AF <= 16; }
+inline bool VkGHL::isValidVSync() {
+  return vSync >= VkPresentModeKHR::VK_PRESENT_MODE_IMMEDIATE_KHR && vSync <= VkPresentModeKHR::VK_PRESENT_MODE_FIFO_KHR;
+}
+inline bool VkGHL::isValidFPS() { return targetFrameTime > TimeDiff(0); }
+inline bool VkGHL::isValidBias() { return mipLODBias >= -16.0f && mipLODBias <= 15.99f; }
+inline bool VkGHL::isValidAF() { return AF >= 1 && AF <= 16; }
 inline bool VkGHL::isValidRetro() { return retroFilter; }
 
-const bool VkGHL::testSettings() {
-  return isValidFPS()
-      || isValidVSync()
-      || isValidBias()
-      || isValidAF()
-      || isValidRetro();
-}
+const bool VkGHL::testSettings() { return isValidFPS() || isValidVSync() || isValidBias() || isValidAF() || isValidRetro(); }
 
 VkGHL vkghl;
