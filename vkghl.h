@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <thread>
 
 #ifdef __clangd__
@@ -23,9 +24,10 @@ class VkGHL : public layer_factory {
         frameOverhead(0),
         frameStart(Clock::now()),
         frameEnd(Clock::now()) {
+    layer_name = "VkGHL";
     isDisabled = !testSettings();
     if (isDisabled)
-      std::fprintf(stderr, "VkGHL: disabled\n");
+      std::cout << "VkGHL: Disabled\n";
   }
 
   VkResult PreCallQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *pPresentInfo) override;
@@ -114,10 +116,10 @@ VkResult VkGHL::PreCallCreateSampler(VkDevice device, const VkSamplerCreateInfo 
 std::chrono::nanoseconds VkGHL::getFrameTime() {
   const char *fpsLimit = std::getenv("FPS");
   if (fpsLimit != nullptr && !std::string(fpsLimit).empty()) {
-    std::fprintf(stderr, "VkGHL: FPS limit: %s fps\n", fpsLimit);
+    std::cout << "VkGHL: FPS limit: " << fpsLimit << "\n";
     double fps = std::stod(fpsLimit);
     if (fps != 0.0)
-      return TimeDiff(long(1000000000.0f / fps));
+      return TimeDiff(uint64_t(1000000000.0f / fps));
   }
   return TimeDiff(0);
 }
@@ -125,7 +127,7 @@ std::chrono::nanoseconds VkGHL::getFrameTime() {
 VkPresentModeKHR VkGHL::getVSync() {
   const char *vsyncType = std::getenv("VSYNC");
   if (vsyncType != nullptr && !std::string(vsyncType).empty()) {
-    std::fprintf(stderr, "VkGHL: VSync: %s\n", vsyncType);
+    std::cout << "VkGHL: VSync: " << vsyncType << "\n";
     int8_t vs = std::stoi(vsyncType);
     if (vs >= 0)
       return static_cast<VkPresentModeKHR>(vs);
@@ -136,7 +138,7 @@ VkPresentModeKHR VkGHL::getVSync() {
 float VkGHL::getLodBias() {
   const char *lodBias = std::getenv("MIPLODBIAS");
   if (lodBias != nullptr && !std::string(lodBias).empty()) {
-    std::fprintf(stderr, "VkGHL: mipLODBias: %s\n", lodBias);
+    std::cout << "VkGHL: mipLODBias: " << lodBias << "\n";
     float mip = std::stof(lodBias);
     if (mip >= -16.0f && mip <= 15.99f)
       return mip;
@@ -147,7 +149,7 @@ float VkGHL::getLodBias() {
 float VkGHL::getAF() {
   const char *aF = std::getenv("AF");
   if (aF != nullptr && !std::string(aF).empty()) {
-    std::fprintf(stderr, "VkGHL: AF: %s\n", aF);
+    std::cout << "VkGHL: AF: " << aF << "\n";
     float af = std::stof(aF);
     if (af >= 1 && af <= 16)
       return af;
@@ -158,7 +160,7 @@ float VkGHL::getAF() {
 bool VkGHL::getRetro() {
   const char *retro = std::getenv("RETRO");
   if (retro != nullptr && !std::string(retro).empty()) {
-    std::fprintf(stderr, "VkGHL: RETRO: %s\n", retro);
+    std::cout << "VkGHL: RETRO: " << retro << "\n";
     return !(std::string(retro) == "0");
   }
   return false;
