@@ -28,12 +28,12 @@ class VkGHL : public layer_factory {
       std::fprintf(stderr, "VkGHL: disabled\n");
   }
 
-  VkResult PreCallQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *pPresentInfo);
-  VkResult PostCallQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *pPresentInfo);
+  VkResult PreCallQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *pPresentInfo) override;
+  VkResult PostCallQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *pPresentInfo) override;
   VkResult PreCallCreateSwapchainKHR(VkDevice device, const VkSwapchainCreateInfoKHR *pCreateInfo, const VkAllocationCallbacks *pAllocator,
-                                     VkSwapchainKHR *pSwapchain);
+                                     VkSwapchainKHR *pSwapchain) override;
   VkResult PreCallCreateSampler(VkDevice device, const VkSamplerCreateInfo *pCreateInfo, const VkAllocationCallbacks *pAllocator,
-                                VkSampler *pSampler);
+                                VkSampler *pSampler) override;
 
  private:
   VkPresentModeKHR getVSync();
@@ -113,10 +113,10 @@ VkResult VkGHL::PreCallCreateSampler(VkDevice device, const VkSamplerCreateInfo 
 
 std::chrono::nanoseconds VkGHL::getFrameTime() {
   const char *fpsLimit = std::getenv("FPS");
-  if (fpsLimit) {
+  if (fpsLimit != nullptr) {
     std::fprintf(stderr, "VkGHL: FPS limit: %s fps\n", fpsLimit);
     double fps = std::stod(fpsLimit);
-    if (fps)
+    if (fps != 0.0)
       return TimeDiff(long(1000000000.0f / fps));
   }
   return TimeDiff(0);
@@ -124,7 +124,7 @@ std::chrono::nanoseconds VkGHL::getFrameTime() {
 
 VkPresentModeKHR VkGHL::getVSync() {
   const char *vsyncType = std::getenv("VSYNC");
-  if (vsyncType) {
+  if (vsyncType != nullptr) {
     std::fprintf(stderr, "VkGHL: VSync: %s\n", vsyncType);
     int8_t vs = std::stoi(vsyncType);
     if (vs >= 0)
@@ -135,7 +135,7 @@ VkPresentModeKHR VkGHL::getVSync() {
 
 float VkGHL::getLodBias() {
   const char *lodBias = std::getenv("MIPLODBIAS");
-  if (lodBias) {
+  if (lodBias != nullptr) {
     std::fprintf(stderr, "VkGHL: mipLODBias: %s\n", lodBias);
     float mip = std::stof(lodBias);
     if (mip >= -16.0f && mip <= 15.99f)
@@ -146,7 +146,7 @@ float VkGHL::getLodBias() {
 
 float VkGHL::getAF() {
   const char *aF = std::getenv("AF");
-  if (aF) {
+  if (aF != nullptr) {
     std::fprintf(stderr, "VkGHL: AF: %s\n", aF);
     float af = std::stof(aF);
     if (af >= 1 && af <= 16)
@@ -157,9 +157,9 @@ float VkGHL::getAF() {
 
 bool VkGHL::getRetro() {
   const char *retro = std::getenv("RETRO");
-  if (retro) {
+  if (retro != nullptr) {
     std::fprintf(stderr, "VkGHL: RETRO: %s\n", retro);
-    return std::string(retro) == "0" || std::string(retro) == "" ? false : true;
+    return !(std::string(retro) == "0" || std::string(retro) == "");
   }
   return false;
 }

@@ -1,0 +1,3 @@
+Checks:          '*,-*braces-around-statements,-misc-unused-parameters,-fuchsia-statically-constructed-objects,-llvm-header-guard,-llvm-include-order'
+WarningsAsErrors: ''
+FormatStyle: file
