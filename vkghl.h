@@ -174,7 +174,7 @@ inline void VkGHL::limiter() {
 }
 
 inline bool VkGHL::isValidVSync() {
-  return vSync >= VkPresentModeKHR::VK_PRESENT_MODE_IMMEDIATE_KHR && vSync <= VkPresentModeKHR::VK_PRESENT_MODE_FIFO_KHR;
+  return vSync >= VkPresentModeKHR::VK_PRESENT_MODE_BEGIN_RANGE_KHR && vSync <= VkPresentModeKHR::VK_PRESENT_MODE_END_RANGE_KHR;
 }
 inline bool VkGHL::isValidFPS() { return targetFrameTime > TimeDiff(0); }
 inline bool VkGHL::isValidBias() { return mipLODBias >= -16.0f && mipLODBias <= 15.99f; }
