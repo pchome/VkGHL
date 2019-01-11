@@ -95,7 +95,7 @@ VkResult VkGHL::PreCallCreateSampler(VkDevice device, const VkSamplerCreateInfo 
     const_cast<float &>(pCreateInfo->mipLodBias) = mipLODBias;
 
   if (isValidAF()) {
-    const_cast<VkBool32 &>(pCreateInfo->anisotropyEnable) = 1;
+    const_cast<VkBool32 &>(pCreateInfo->anisotropyEnable) = !(AF == 0);
     const_cast<float &>(pCreateInfo->maxAnisotropy)       = AF;
   }
   if (isValidRetro()) {
@@ -144,7 +144,7 @@ float VkGHL::getAF() {
   if (aF != nullptr && !std::string(aF).empty()) {
     std::cout << "VkGHL: AF: " << aF << "\n";
     float af = std::stof(aF);
-    if (af >= 1 && af <= 16)
+    if (af >= 0 && af <= 16)
       return af;
   }
   return 666;
@@ -173,7 +173,7 @@ inline bool VkGHL::isValidVSync() {
 }
 inline bool VkGHL::isValidFPS() { return targetFrameTime > TimeDiff(0); }
 inline bool VkGHL::isValidBias() { return mipLODBias >= -16.0f && mipLODBias <= 15.99f; }
-inline bool VkGHL::isValidAF() { return AF >= 1 && AF <= 16; }
+inline bool VkGHL::isValidAF() { return AF == 0 || (AF >= 1 && AF <= 16); }
 inline bool VkGHL::isValidRetro() { return retroFilter; }
 
 const bool VkGHL::testSettings() { return isValidFPS() || isValidVSync() || isValidBias() || isValidAF() || isValidRetro(); }
