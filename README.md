@@ -1,6 +1,22 @@
-# VkGHL - Vulkan (Game Halt, Green Hog, ... whatever)? Layer
+# VkGHL
 
-### Build
+Vulkan _(Game Halt, Green Hog, ... whatever)?_ Layer.<br/>
+_Force anisotropy, mip LOD Bias, VSYNC and limit frame rate for Vulkan-driven games._
+
+## Settings (environment variables)
+
+* **FPS** - limit frame time (`>0`)
+* **AF** - Anisotropy (`0` - Off, `1..16` - On)
+* **MIPLODBIAS** - Mip Map LOD Bias (`-16..16` (aka `sharpen..blurry`, `-1` is ok in general))<br/>
+  _Consider to disable AA/AF when setting this._
+* **RETRO** - "retro" filter (`0` - Off, `1` - On)
+* **VSYNC**<br/>
+  `0` - Off<br/>
+  `1` - Mailbox (uncapped framerate)<br/>
+  `2` - On<br/>
+  `3` - Adaptive
+
+## Build
 
 #### Prepare
 
@@ -13,7 +29,7 @@
 
 1. `mkdir -p build_layer`
 2. `cd build_layer`
-3. 
+3.
 ```
 cmake \
 -DCMAKE_BUILD_TYPE=Release \
@@ -46,7 +62,7 @@ VK_INSTANCE_LAYERS="VK_LAYER_LUNARG_VkGHL" \
 wine d3d11-triangle.exe
 ```
 
-#### Note
+## Note
 
 Currently mimics [libstrangle](https://gitlab.com/torkel104/libstrangle) behaviour and env vars (UPPERCASE ones).
 This may change in future.
