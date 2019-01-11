@@ -30,7 +30,6 @@ class VkGHL : public layer_factory {
       std::cout << "VkGHL: Disabled\n";
   }
 
-  VkResult PreCallQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *pPresentInfo) override;
   VkResult PostCallQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *pPresentInfo) override;
   VkResult PreCallCreateSwapchainKHR(VkDevice device, const VkSwapchainCreateInfoKHR *pCreateInfo, const VkAllocationCallbacks *pAllocator,
                                      VkSwapchainKHR *pSwapchain) override;
@@ -69,16 +68,10 @@ class VkGHL : public layer_factory {
   bool isDisabled;
 };
 
-VkResult VkGHL::PreCallQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *pPresentInfo) {
-  if (isDisabled)
-    return VK_SUCCESS;
-  frameStart = Clock::now();
-  return VK_SUCCESS;
-}
-
 VkResult VkGHL::PostCallQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *pPresentInfo) {
   if (isDisabled)
     return VK_SUCCESS;
+  frameStart = Clock::now();
   limiter();
   frameEnd = Clock::now();
   return VK_SUCCESS;
@@ -116,7 +109,7 @@ VkResult VkGHL::PreCallCreateSampler(VkDevice device, const VkSamplerCreateInfo 
 std::chrono::nanoseconds VkGHL::getFrameTime() {
   const char *fpsLimit = std::getenv("FPS");
   if (fpsLimit != nullptr && !std::string(fpsLimit).empty()) {
-    std::cout << "VkGHL: FPS limit: " << fpsLimit << "\n";
+    std::cout << "VkGHL: FPS limit: " << fpsLimit << " fps\n";
     double fps = std::stod(fpsLimit);
     if (fps != 0.0)
       return TimeDiff(uint64_t(1000000000.0f / fps));
