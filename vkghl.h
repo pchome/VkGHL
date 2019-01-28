@@ -35,6 +35,8 @@ class VkGHL : public layer_factory {
                                      VkSwapchainKHR *pSwapchain) override;
   VkResult PreCallCreateSampler(VkDevice device, const VkSamplerCreateInfo *pCreateInfo, const VkAllocationCallbacks *pAllocator,
                                 VkSampler *pSampler) override;
+  VkResult PostCallGetPhysicalDeviceSurfacePresentModesKHR(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface, uint32_t *pPresentModeCount,
+                                                           VkPresentModeKHR *pPresentModes) override;
 
  private:
   VkPresentModeKHR getVSync();
@@ -46,6 +48,7 @@ class VkGHL : public layer_factory {
 
   inline void limiter();
   const bool  testSettings();
+  const char *getPresentModeName(VkPresentModeKHR mode);
 
   inline bool isValidFPS();
   inline bool isValidVSync();
@@ -74,6 +77,18 @@ VkResult VkGHL::PostCallQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *p
   frameStart = Clock::now();
   limiter();
   frameEnd = Clock::now();
+  return VK_SUCCESS;
+}
+
+VkResult VkGHL::PostCallGetPhysicalDeviceSurfacePresentModesKHR(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface, uint32_t *pPresentModeCount,
+                                                                VkPresentModeKHR *pPresentModes) {
+  if (pPresentModes != nullptr) {
+    std::vector<VkPresentModeKHR> present_modes;
+    present_modes.insert(present_modes.begin(), pPresentModes, pPresentModes + *pPresentModeCount);
+    std::cout << "VkGHL: Present modes cnt: " << *pPresentModeCount << "\n";
+    for (auto present_mode : present_modes)
+      std::cout << "VkGHL:     " << getPresentModeName(present_mode) << ": " << present_mode << "\n";
+  }
   return VK_SUCCESS;
 }
 
@@ -177,5 +192,14 @@ inline bool VkGHL::isValidAF() { return AF == 0 || (AF >= 1 && AF <= 16); }
 inline bool VkGHL::isValidRetro() { return retroFilter; }
 
 const bool VkGHL::testSettings() { return isValidFPS() || isValidVSync() || isValidBias() || isValidAF() || isValidRetro(); }
+
+inline const char *VkGHL::getPresentModeName(VkPresentModeKHR mode) {
+  std::unordered_map<VkPresentModeKHR, const char *> modes;
+  modes = {{VK_PRESENT_MODE_FIFO_RELAXED_KHR, "VK_PRESENT_MODE_FIFO_RELAXED_KHR"},
+           {VK_PRESENT_MODE_IMMEDIATE_KHR, "VK_PRESENT_MODE_IMMEDIATE_KHR"},
+           {VK_PRESENT_MODE_MAILBOX_KHR, "VK_PRESENT_MODE_MAILBOX_KHR"},
+           {VK_PRESENT_MODE_FIFO_KHR, "VK_PRESENT_MODE_FIFO_KHR"}};
+  return modes[mode];
+}
 
 VkGHL vkghl;
