@@ -30,13 +30,13 @@ class VkGHL : public layer_factory {
       std::cout << "VkGHL: Disabled\n";
   }
 
-  VkResult PostCallQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *pPresentInfo) override;
+  VkResult PostCallQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *pPresentInfo, VkResult result) override;
   VkResult PreCallCreateSwapchainKHR(VkDevice device, const VkSwapchainCreateInfoKHR *pCreateInfo, const VkAllocationCallbacks *pAllocator,
                                      VkSwapchainKHR *pSwapchain) override;
   VkResult PreCallCreateSampler(VkDevice device, const VkSamplerCreateInfo *pCreateInfo, const VkAllocationCallbacks *pAllocator,
                                 VkSampler *pSampler) override;
   VkResult PostCallGetPhysicalDeviceSurfacePresentModesKHR(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface, uint32_t *pPresentModeCount,
-                                                           VkPresentModeKHR *pPresentModes) override;
+                                                           VkPresentModeKHR *pPresentModes, VkResult result) override;
 
  private:
   VkPresentModeKHR getVSync();
@@ -71,7 +71,7 @@ class VkGHL : public layer_factory {
   bool isDisabled;
 };
 
-VkResult VkGHL::PostCallQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *pPresentInfo) {
+VkResult VkGHL::PostCallQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *pPresentInfo, VkResult result) {
   if (isDisabled)
     return VK_SUCCESS;
   frameStart = Clock::now();
@@ -81,7 +81,7 @@ VkResult VkGHL::PostCallQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *p
 }
 
 VkResult VkGHL::PostCallGetPhysicalDeviceSurfacePresentModesKHR(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface, uint32_t *pPresentModeCount,
-                                                                VkPresentModeKHR *pPresentModes) {
+                                                                VkPresentModeKHR *pPresentModes, VkResult result) {
   if (pPresentModes != nullptr) {
     std::vector<VkPresentModeKHR> present_modes;
     present_modes.insert(present_modes.begin(), pPresentModes, pPresentModes + *pPresentModeCount);
