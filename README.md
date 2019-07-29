@@ -29,9 +29,10 @@ _Force anisotropy, mip LOD Bias, VSYNC and limit frame rate for Vulkan-driven ga
 
 1. `mkdir -p build_layer`
 2. `cd build_layer`
-3.
+3. NOTE: full path to Vulkan header files (may fix `"vk_loader_platform.h"` compile-time errors)
 ```
 cmake \
+-DCMAKE_CXX_FLAGS="-I/usr/include/vulkan" \
 -DCMAKE_BUILD_TYPE=Release \
 -DCMAKE_INSTALL_PREFIX=/tmp/VkGHL \
 -DBUILD_TESTS=OFF \
