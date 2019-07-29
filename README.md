@@ -47,9 +47,11 @@ cmake \
 ..
 ```
 4. `make`
-5. `cd layers`
+5. Repeat steps 1..4 for 32bit build<br>
+    (e.g. use `build_layer32` name and `-DCMAKE_CXX_FLAGS="-m32 -I/usr/include/vulkan"`)
 
 #### Try
+`cd layers`
 
 ```
 MIPLODBIAS=-1 \
@@ -62,6 +64,29 @@ VK_LAYER_PATH=. \
 VK_INSTANCE_LAYERS="VK_LAYER_LUNARG_VkGHL" \
 wine d3d11-triangle.exe
 ```
+
+#### Suitable installation path examples
+In such cases you can ommit `VK_LAYER_PATH=` environment variable.
+Install `*.so` files into directory visible via `LD_LIBRARY_PATH=`.
+
+System
+```
+/usr/lib/libVkLayer_VkGHL.so
+/usr/lib64/libVkLayer_VkGHL.so
+/usr/share/vulkan/explicit_layer.d/VkLayer_VkGHL.json
+```
+
+User (add `LD_LIBRARY_PATH="${HOME}/.local/lib64:${HOME}/.local/lib"` to your env)
+```
+~/.local/lib/libVkLayer_VkGHL.so
+~/.local/lib64/libVkLayer_VkGHL.so
+~/.local/share/vulkan/explicit_layer.d/VkLayer_VkGHL.json
+```
+
+## Useful tools
+[vkconfig](https://github.com/LunarG/VulkanTools/blob/master/vkconfig/vkconfig.md)
+
+> The Vulkan Configurator is a graphical application that allows a user to specify which layers will be loaded by Vulkan applications at runtime. It provides an alternative to setting layers through environment variables or an application's layer selection. In addition, it allows using layers from non-standard locations, selecting the ordering for implicit layers, and specifying settings for layers that Vulkan Configurator supports.
 
 ## Note
 
